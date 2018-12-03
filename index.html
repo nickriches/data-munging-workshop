@@ -1572,7 +1572,14 @@ g</code></pre>
 <p>Okay. Now we’re going to transform the data from the wide format into a long format. I was originally hoping to transpose the entire data set. However, this pretty much crashes the machine as it creates a dataset of over 15 million observations! Therefore we are just going to select participants who speak Spanish, French and German as their first languages.</p>
 <pre class="r"><code>df %&gt;% filter(primelangs == &quot;Spanish&quot; |
               primelangs == &quot;French&quot; |
-              primelangs == &quot;German&quot;) -&gt; df</code></pre>
+              primelangs == &quot;German&quot;) -&gt; df
+
+df$primelangs &lt;- droplevels(df$primelangs)
+
+table(df$primelangs)</code></pre>
+<pre><code>## 
+##  French  German Spanish 
+##    8424   18202   10557</code></pre>
 </div>
 <div id="gathering-converting-from-wide-to-long" class="section level2">
 <h2><span class="header-section-number">7.2</span> Gathering (converting from wide to long)</h2>
@@ -1686,7 +1693,35 @@ summary(model)</code></pre>
 df %&gt;%
   merge(df.tot, by = &quot;id&quot;) %&gt;%
   glm(answer.x ~ primelangs.x + total, family=binomial(link='logit'), data = .) -&gt;
-  model</code></pre>
+  model
+  
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = answer.x ~ primelangs.x + total, family = binomial(link = &quot;logit&quot;), 
+##     data = .)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.6027   0.2910   0.3286   0.4039   3.4718  
+## 
+## Coefficients:
+##                     Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept)        -6.660935   0.022445 -296.773   &lt;2e-16 ***
+## primelangs.xFrench  0.002550   0.005559    0.459    0.646    
+## primelangs.xGerman  0.038685   0.004709    8.216   &lt;2e-16 ***
+## total               0.106117   0.000273  388.753   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1986055  on 3532384  degrees of freedom
+## Residual deviance: 1831791  on 3532381  degrees of freedom
+## AIC: 1831799
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<p>Now the difference between the L1 Spanish and French participants has vanished, but not the difference between the L1 Spanish and German participants.</p>
 <p>Let’s plot performance by language, and years spent studying English. There are two plots, a smoothed, and a non-smoothed one.</p>
 <pre class="r"><code>df %&gt;%
   filter(question == &quot;q21_1&quot;) %&gt;%

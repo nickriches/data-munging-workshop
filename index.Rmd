@@ -140,6 +140,10 @@ df %>% filter(primelangs == "Spanish" |
               primelangs == "French" |
               primelangs == "German") -> df
 
+df$primelangs <- droplevels(df$primelangs)
+
+table(df$primelangs)
+
 ```
 
 ## Gathering (converting from wide to long)
@@ -233,9 +237,12 @@ df %>%
   merge(df.tot, by = "id") %>%
   glm(answer.x ~ primelangs.x + total, family=binomial(link='logit'), data = .) ->
   model
+  
+summary(model)
 
 ```
 
+Now the difference between the L1 Spanish and French participants has vanished, but not the difference between the L1 Spanish and German participants.
 
 Let's plot performance by language, and years spent studying English. There are two plots, a smoothed, and a non-smoothed one.
 
