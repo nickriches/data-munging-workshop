@@ -1482,6 +1482,7 @@ div.tocify {
 <p>Hartshorne, J. K., Tenenbaum, J. B., &amp; Pinker, S. (2018). A critical period for second language acquisition: Evidence from 2/3 million English speakers. Cognition. <a href="https://doi.org/10.1016/j.cognition.2018.04.007" class="uri">https://doi.org/10.1016/j.cognition.2018.04.007</a></p>
 <p>This explores the English grammatical abilites of 2/3 million individuals who have acquired English as a second language. As such, it presents an <em>unparallelled</em> opportunity to test theories of L1 transfer during second language learning. It also provides an opportunity to show off the power or R!!</p>
 <p>The data has been published on the Open Science Framework at <a href="https://osf.io/pyb8s/" class="uri">https://osf.io/pyb8s/</a></p>
+<p>The RMarkdown file used to create this website can be downloaded <a href="index.Rmd">here</a></p>
 </div>
 <div id="basics" class="section level1">
 <h1><span class="header-section-number">2</span> Basics</h1>
@@ -1589,7 +1590,9 @@ g</code></pre>
 <p>Now, having saved the <code>questionnaire.csv</code> file to the appropriate locaction, I am going to merge the two data sets:</p>
 <pre class="r"><code>df.qs &lt;- read.csv(&quot;questionnaire.csv&quot;)
 
-df %&gt;% merge(df.qs, by.x = &quot;question&quot;, by.y = &quot;q&quot;) -&gt; df</code></pre>
+df %&gt;%
+  merge(df.qs, by.x = &quot;question&quot;, by.y = &quot;q&quot;) -&gt;
+  df</code></pre>
 <p>Note that the linking variable has a slightly different name in each data set (the x and y datasets). If the linking variable had the same name we would just have the option <code>by = &quot;var_name&quot;</code>.</p>
 </div>
 </div>
@@ -1674,7 +1677,17 @@ summary(model)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 9</code></pre>
 <p>Yes, the Spanish speakers still perform significantly worse.</p>
-<p>Let’s plot performance by language, and years spent studying English</p>
+<p>Now let’s create a different variable to measure basic language abilities. We’re going to calculate individuals overall scores. This involves a pipe with <code>group_by</code> and then <code>summarise</code></p>
+<pre class="r"><code>df %&gt;%
+  group_by(id, primelangs)%&gt;%
+  summarise(total = sum(correct)) -&gt;
+  df.tot
+
+df %&gt;%
+  merge(df.tot, by = &quot;id&quot;) %&gt;%
+  glm(answer.x ~ primelangs.x + total, family=binomial(link='logit'), data = .) -&gt;
+  model</code></pre>
+<p>Let’s plot performance by language, and years spent studying English. There are two plots, a smoothed, and a non-smoothed one.</p>
 <pre class="r"><code>df %&gt;%
   filter(question == &quot;q21_1&quot;) %&gt;%
   group_by(primelangs, length_of_learning) %&gt;%
